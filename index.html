@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 Firebase Control</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+</head>
+<body>
+  <h1>ESP32 Firebase Control</h1>
+  <div>
+    <h2>Sensor Data</h2>
+    <p>Water Level: <span id="waterLevel">Loading...</span></p>
+    <p>Motor 1: <span id="motor1State">Loading...</span></p>
+    <p>Motor 2: <span id="motor2State">Loading...</span></p>
+    <p>Emergency Horn: <span id="emergencyHornState">Loading...</span></p>
+  </div>
+  <div>
+    <h2>Control Panel</h2>
+    <button id="toggleMotor1">Toggle Motor 1</button>
+    <button id="toggleMotor2">Toggle Motor 2</button>
+    <button id="toggleHorn">Toggle Emergency Horn</button>
+  </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqur4xNev3UrHJCEcFq6EwG-pEVVN3w1Q",
+      authDomain: "test-1-acc59.firebaseapp.com",
+      databaseURL: "https://test-1-acc59-default-rtdb.firebaseio.com",
+      projectId: "test-1-acc59",
+      storageBucket: "test-1-acc59.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const waterLevelEl = document.getElementById('waterLevel');
+    const motor1StateEl = document.getElementById('motor1State');
+    const motor2StateEl = document.getElementById('motor2State');
+    const hornStateEl = document.getElementById('emergencyHornState');
+
+    firebase.database().ref('/sensorData').on('value', (snapshot) => {
+      const data = snapshot.val();
+      waterLevelEl.innerText = data.waterLevel || 'N/A';
+      motor1StateEl.innerText = data.motor1 ? 'On' : 'Off';
+      motor2StateEl.innerText = data.motor2 ? 'On' : 'Off';
+      hornStateEl.innerText = data.emergencyHorn ? 'On' : 'Off';
+    });
+
+    document.getElementById('toggleMotor1').addEventListener('click', () => {
+      firebase.database().ref('/controlData/motor1').get().then((snapshot) => {
+        const currentState = snapshot.val();
+        firebase.database().ref('/controlData/motor1').set(!currentState);
+      });
+    });
+
+    document.getElementById('toggleMotor2').addEventListener('click', () => {
+      firebase.database().ref('/controlData/motor2').get().then((snapshot) => {
+        const currentState = snapshot.val();
+        firebase.database().ref('/controlData/motor2').set(!currentState);
+      });
+    });
+
+    document.getElementById('toggleHorn').addEventListener('click', () => {
+      firebase.database().ref('/controlData/emergencyHorn').get().then((snapshot) => {
+        const currentState = snapshot.val();
+        firebase.database().ref('/controlData/emergencyHorn').set(!currentState);
+      });
+    });
+  </script>
+</body>
+</html>
